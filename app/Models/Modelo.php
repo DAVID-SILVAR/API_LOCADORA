@@ -23,4 +23,10 @@ class Modelo extends Model
             'abs' => 'required|bolean'
         ];
     }
+
+    public function marca() 
+    {
+        return $this->belongsTo("App/Models/Marca");
+    }
+
 }

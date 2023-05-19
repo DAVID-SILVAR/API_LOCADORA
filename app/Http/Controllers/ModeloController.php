@@ -24,16 +24,6 @@ class ModeloController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -63,7 +53,7 @@ class ModeloController extends Controller
      */
     public function show($id)
     {
-        $modelo =$this->modelo->find($id);
+        $modelo =$this->modelo->width('marca')->find($id);
 
         if (is_null($modelo)) {
             return response()->json(['erro' => 'Rercuso pesquisado não existe'], 404);
@@ -73,26 +63,45 @@ class ModeloController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Modelo  $modelo
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Modelo $modelo)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Modelo  $modelo
+     * @param  Integer
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Modelo $modelo)
+    public function update(Request $request, $id)
     {
-        //
+        $modelo = $this->modelo->find($id);
+
+        if (is_null($modelo)) {
+            return response()->json(['erro' => "Impossível atualizar o registro. A marca não existe!"], 404);
+        }
+
+        if ($request->method() === 'PATCH') {
+            $regrasDinamicas = array();
+             
+            // Percorrendo regras definidas no Model
+            foreach ($modelo->rules() as $input => $regra) {
+
+                // Pegando apenas regras que se encaixem neste contexto
+                if (array_key_exists($input, $request->all())) {
+                    $regrasDinamicas[$input] = $regra;
+                }
+            }
+            $request->validate($regrasDinamicas);
+        } else {
+            $request->validate($modelo->rules());
+        }
+        $modelo->update([
+            'marca_id' => $request->marca_id,
+            'nome' => $request->nome,
+            'numero_portas' => $request->numero_portas,
+            'lugares' => $request->lugares,
+            'air_bag' => $request->air_bag,
+            'abs' => $request->abs
+        ]);
+
+        return response()->json($modelo, 200);
     }
 
     /**
@@ -101,8 +110,15 @@ class ModeloController extends Controller
      * @param  \App\Models\Modelo  $modelo
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Modelo $modelo)
+    public function destroy($id)
     {
-        //
+        $modelo = $this->modelo->find($id);
+
+        if (is_null($modelo)) {
+            return response()->json(['erro' => "Impossível deletar o registro. O modelo selecionado não existe!"], 404);
+        }
+
+        $modelo->delete();
+        return response()->json(['msg' => "Modelo Removida"], 200);
     }
 }

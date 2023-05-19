@@ -56,7 +56,7 @@ class MarcaController extends Controller
      */
     public function show($id)
     {
-        $marca = $this->marca->find($id);
+        $marca = $this->marca->width('modelos')->find($id);
 
         if (is_null($marca)) {
             return response()->json(['erro' => "Marca pesquisada não existe."], 404);
