@@ -7,6 +7,12 @@ use Illuminate\Http\Request;
 
 class ModeloController extends Controller
 {
+    protected $modelo;
+    public function __construct(Modelo $modelo)
+    {
+        $this->modelo = $modelo;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -14,7 +20,7 @@ class ModeloController extends Controller
      */
     public function index()
     {
-        //
+        return response()->json($this->modelo->all(), 200);
     }
 
     /**
@@ -35,18 +41,35 @@ class ModeloController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate($this->modelo->rules());
+
+        $modelo = $this->modelo->create([
+            'marca_id' => $request->marca_id,
+            'nome' => $request->nome,
+            'numero_portas' => $request->numero_portas,
+            'lugares' => $request->lugares,
+            'air_bag' => $request->air_bag,
+            'abs' => $request->abs
+        ]);
+
+        return response()->json($modelo, 201);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Modelo  $modelo
+     * @param  \App\Models\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function show(Modelo $modelo)
+    public function show($id)
     {
-        //
+        $modelo =$this->modelo->find($id);
+
+        if (is_null($modelo)) {
+            return response()->json(['erro' => 'Rercuso pesquisado não existe'], 404);
+        }
+
+        return response()->json($modelo, 200);
     }
 
     /**
